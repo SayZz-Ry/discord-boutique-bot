@@ -3,6 +3,7 @@ from discord import app_commands
 import sqlite3
 import os
 from datetime import datetime
+from enum import Enum
 from dotenv import load_dotenv
 
 # Chargement des variables d'environnement
@@ -12,6 +13,21 @@ PAYPAL_USER = os.getenv('PAYPAL_USER', 'toncompte')
 
 DATABASE_FILE = 'boutique.db'
 DATE_FORMAT = "%d/%m/%Y"
+
+class Statut(Enum):
+    EN_ATTENTE = ("En attente", "en_attente")
+    PAYE = ("Payée", "paye")
+    ENVOYE = ("Expédiée", "envoye")
+    ANNULE = ("Annulée", "annule")
+
+    def __init__(self, label: str, key: str):
+        self.label = label
+        # override _value_ to key for .value
+        self._value_ = key
+
+    @classmethod
+    def choices(cls) -> list[app_commands.Choice[ str ]]:
+        return [app_commands.Choice(name=s.label, value=s.value) for s in cls]
 
 
 
