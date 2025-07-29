@@ -51,6 +51,7 @@ Pour inviter le bot dans votre serveur Discord :
 | `/liste_produits_admin`    | Liste tous les produits avec leurs IDs                           | Administrateur |
 | `/toutes_commandes`        | Affiche toutes les commandes enregistrées                        | Administrateur |
 | `/annuler_commande ...`    | Annule une commande par produit et date                          | Administrateur |
+| `/modifier_statut <commande_id> <statut>` | Modifie le statut d'une commande                           | Administrateur |
 
 ## 🛠️ Fonctionnement interne
 

@@ -120,7 +120,7 @@ def obtenir_toutes_commandes():
     cursor = conn.cursor()
     
     cursor.execute('''
-        SELECT user_id, produit_id, quantite, prix_unitaire, total, statut, date_commande
+        SELECT id, user_id, produit_id, quantite, prix_unitaire, total, statut, date_commande
         FROM commandes
         ORDER BY date_commande DESC
     ''')
@@ -128,13 +128,14 @@ def obtenir_toutes_commandes():
     commandes = []
     for row in cursor.fetchall():
         commandes.append({
-            'user_id': row[0],
-            'produit_id': row[1],
-            'quantite': row[2],
-            'prix_unitaire': row[3],
-            'total': row[4],
-            'statut': row[5],
-            'date_commande': row[6]
+            'id': row[0],
+            'user_id': row[1],
+            'produit_id': row[2],
+            'quantite': row[3],
+            'prix_unitaire': row[4],
+            'total': row[5],
+            'statut': row[6],
+            'date_commande': row[7]
         })
     
     conn.close()
@@ -249,6 +250,15 @@ def logement_choices():
     """Retourne les choix de produits pour les commandes Discord"""
     produits = obtenir_produits()
     return [app_commands.Choice(name=p['nom'], value=p['id']) for p in produits]
+
+def statut_choices():
+    """Retourne les choix de statut pour les commandes Discord"""
+    return [
+        app_commands.Choice(name="En attente", value="en_attente"),
+        app_commands.Choice(name="Payée", value="paye"),
+        app_commands.Choice(name="Expédiée", value="envoye"),
+        app_commands.Choice(name="Annulée", value="annule"),
+    ]
 
 def verifier_permissions_admin(interaction: discord.Interaction) -> bool:
     """Vérifie si l'utilisateur a les permissions d'administrateur"""
@@ -529,9 +539,42 @@ async def toutes_commandes(interaction: discord.Interaction):
             produits = obtenir_produits()
             produit = next((p for p in produits if p['id'] == c['produit_id']), None)
             if produit:
-                msg += f"🛍️ **{produit['nom']}** - {c['quantite']}x ({c['total']} €) - User: {c['user_id']} - {c['statut']}\n"
+                print(c)
+                msg += f"🛍️ [ID:{c['id']}] **{produit['nom']}** - {c['quantite']}x ({c['total']} €) - User: {c['user_id']} - {c['statut']}\n"
     
     await interaction.response.send_message(msg, ephemeral=True)
+
+
+@bot.tree.command(name="modifier_statut", description="Modifie le statut d'une commande (Admin)")
+@app_commands.describe(
+    commande_id="ID de la commande à modifier",
+    statut="Nouveau statut de la commande"
+)
+@app_commands.choices(statut=statut_choices())
+async def modifier_statut(interaction: discord.Interaction, commande_id: int, statut: app_commands.Choice[str]):
+    # Vérification des permissions admin
+    if not verifier_permissions_admin(interaction):
+        await interaction.response.send_message("❌ Cette commande est réservée aux administrateurs.", ephemeral=True)
+        return
+
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE commandes SET statut = ? WHERE id = ?",
+        (statut.value, commande_id)
+    )
+    if cursor.rowcount > 0:
+        conn.commit()
+        await interaction.response.send_message(
+            f"✅ Statut de la commande {commande_id} mis à jour en **{statut.value}**.",
+            ephemeral=True
+        )
+    else:
+        await interaction.response.send_message(
+            "❌ Aucune commande trouvée avec cet ID.",
+            ephemeral=True
+        )
+    conn.close()
 
 if __name__ == "__main__":
     bot.run(TOKEN) 
