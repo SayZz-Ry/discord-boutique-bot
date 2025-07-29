@@ -27,6 +27,17 @@ DISCORD_TOKEN=...
 PAYPAL_USER=...
 ```
 
+## ➕ Ajouter le bot à votre serveur
+
+Pour inviter le bot dans votre serveur Discord :
+
+1. Rendez-vous sur le portail des développeurs Discord : https://discord.com/developers/applications
+2. Sélectionnez votre application correspondant à ce bot.
+3. Dans le menu de gauche, cliquez sur **OAuth2 > URL Generator**.
+4. Dans **Scopes**, cochez **bot** et **applications.commands**.
+5. Dans la section **Bot Permissions**, sélectionnez les permissions nécessaires (par exemple : Envoyer des messages, Gérer les messages, Intégrer des liens).
+6. Copiez l’URL générée, collez-la dans votre navigateur et choisissez le serveur où inviter le bot.
+
 ## 📝 Commandes disponibles
 
 | Commande                   | Description                                                      | Permissions    |
